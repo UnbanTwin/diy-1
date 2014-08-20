@@ -1,36 +1,99 @@
-<!DOCTYPE html><!--HTML5 doctype-->
+<!DOCTYPE html>
+<!--HTML5 doctype-->
 <html>
+
 <head>
 	<title>diy</title>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0" />
 	<style type="text/css">
 		/* Prevent copy paste for all elements except text fields */
-		*  { -webkit-user-select:none; -webkit-tap-highlight-color:rgba(255, 255, 255, 0); }
-		input, textarea  { -webkit-user-select:text; }
-		body { background-color:white; color:black }
-        
-        html, body {
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
+		* {
+			-webkit-user-select: none;
+			-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+		}
+		input,
+		textarea {
+			-webkit-user-select: text;
+		}
+		body {
+			background-color: white;
+			color: black
+		}
+		html,
+		body {
+			width: 100%;
+			margin: 0;
+			padding: 0;
+		}
 	</style>
 	<script src="intelxdk.js"></script>
 	<script type="text/javascript">
 		/* Intel native bridge is available */
-		var onDeviceReady=function() {
-		// hide splash screen
-		intel.xdk.device.hideSplashScreen();
+		var onDeviceReady = function() {
+			// hide splash screen
+			intel.xdk.device.hideSplashScreen();
 		};
 		document.addEventListener("intel.xdk.device.ready", onDeviceReady, false);
 	</script>
 </head>
+
 <body>
-    <script src="jquery-2.1.1.min.js"></script>
-    <script src="http://d175bhq053ab3b.cloudfront.net/diy.dist.js"></script>
-    <script type="text/javascript">
-        var diy = diyClient();
-    </script>
+	<!-- Login screen -->
+	<div id="loginScreen">
+		<form>
+			<input type="text" id="unField" placeholder="Username"></input>
+			<input type="password" id="pwField" placeholder="Password"></input>
+			<!-- Login submit -->
+			<button id="hitLogin">Submit</button>
+		</form>
+	</div>
+	<!-- NTS: change "display" to "none" until required -->
+
+	<!-- Load jQuery and the DIY API -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="http://d175bhq053ab3b.cloudfront.net/diy.dist.js"></script>
+
+	<!-- API functions -->
+	<script type="text/javascript">
+		// Start the client
+		var diy = diyClient();
+
+		// Authorization for token
+		var newLogin = function(un, pw) {
+			$.ajax({
+				method: "GET",
+				url: "https://api.diy.org/login",
+				dataType: "json",
+				headers: {
+					"Authorization": "Basic " + btoa(un.toString() + ":" + pw.toString())
+				    // In format of "username:password"
+				},
+				success: function(s) { // Username and password accepted
+					var authToken = s.response.token,
+						response = s;
+					/* "authToken" represents the alphanumeric token for each account;
+					"response" includes url, adult, moderator, subscriber, verified, etc. */
+					console.log(authToken);
+				},
+				error: function() { // Username and password invalid
+					console.log("Failed to authorize.");
+				}
+			});
+		}
+
+		var unField = document.getElementById("unField"),
+			pwField = document.getElementById("pwField");
+		// When "Submit" pressed on login screen
+		var sendLogin = function(e) {
+			e.preventDefault();
+			if (unField.value !== null && pwField.value !== null) {
+				newLogin(unField.value, pwField.value);
+			}
+		}
+
+		$("#loginScreen").on("submit", sendLogin);
+	</script>
 </body>
+
 </html>
